@@ -13,8 +13,10 @@
 
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>个人信息</el-dropdown-item>
-                <el-dropdown-item>退出</el-dropdown-item>
+                <el-dropdown-item @click="goUserInfo">
+                  <span>个人信息</span>
+                </el-dropdown-item>
+                <el-dropdown-item @click="logout">退出</el-dropdown-item>
               </el-dropdown-menu>
             </template>
           </el-dropdown>
@@ -68,7 +70,10 @@
 import { getCurrentInstance, ref, watch } from "vue";
 import VueCookies from "vue-cookies";
 import { useRouter, useRoute } from "vue-router";
+// import store from "@/store";
+import { useStore } from "vuex";
 
+const store = useStore();
 const router = useRouter();
 const route = useRoute();
 const { proxy } = getCurrentInstance();
@@ -95,7 +100,7 @@ const menuList = ref([
     children: [
       {
         title: "专题管理",
-        path: "/special/category",
+        path: "/special/list",
       },
     ],
   },
@@ -132,17 +137,30 @@ const menuList = ref([
   },
 ]);
 
+const api = {
+  getUserInfo: "getUserInfo",
+  logout: "logout",
+};
 function openClose(index: number): void {
   menuList.value[index].open = !menuList.value[index].open;
 }
 
 const userInfo = ref({});
-function init(): void {
-  userInfo.value = VueCookies.get("userInfo");
-  // console.log(userInfo.value);
-  //没有该后端图片，直接采取本地
-  // userInfo.value.avatar = proxy.globalInfo.imageUrl + userInfo.value.avatar;
-  // console.log(userInfo.value.avatar);
+async function init(): Promise<void> {
+  let result = await proxy.Request({
+    url: api.getUserInfo,
+  });
+  if (!result) {
+    return;
+  }
+  userInfo.value = result.data;
+
+  //以下是cookie方法
+  // userInfo.value = VueCookies.get("userInfo");
+  // // console.log(userInfo.value);
+  // //没有该后端图片，直接采取本地
+  // // userInfo.value.avatar = proxy.globalInfo.imageUrl + userInfo.value.avatar;
+  // // console.log(userInfo.value.avatar);
   userInfo.value.avatar = "../../src/assets/avatar.jpg";
 }
 
@@ -156,6 +174,33 @@ watch(
   route,
   (newVal, oldVal) => {
     activePath.value = newVal.path;
+  },
+  { immediate: true, deep: true }
+);
+
+//跳转到个人信息页
+function goUserInfo(): void {
+  router.push("../setting/my");
+}
+//退出登录
+const logout = (data: Object) => {
+  proxy.Confirm(`你确定要退出吗?`, async () => {
+    let result = await proxy.Request({
+      url: api.logout,
+    });
+    if (!result) {
+      return;
+    }
+    router.push("/login");
+  });
+};
+
+watch(
+  () => store.state.userInfo,
+  (newVal, oldVal) => {
+    const avatar = proxy.globalInfo.imageUrl + newVal.avatar;
+    const nickName = newVal.nickName;
+    userInfo.value = { avatar, nickName };
   },
   { immediate: true, deep: true }
 );
@@ -183,6 +228,7 @@ watch(
       }
       .avatar {
         width: 50px;
+        height: 50px;
         margin-left: 10px;
         img {
           border-radius: 50px;

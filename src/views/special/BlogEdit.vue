@@ -160,7 +160,7 @@ const init = (type: string, data) => {
   windowConfig.show = true;
   nextTick(() => {
     blogFormDataRef.value.resetFields(); //重置表单信息
-    blogFormData.value = { tag: [] };
+    blogFormData.value = {};
     if (type === "add") {
       getUserInfo();
     } else {

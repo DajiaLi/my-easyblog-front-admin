@@ -99,7 +99,7 @@
       </div>
     </template>
   </Table>
-  <BlogEdit></BlogEdit>
+  <BlogEdit ref="blogEditRef" @callback="loadDataList"></BlogEdit>
 </template>
 
 <script setup lang="ts">
@@ -190,6 +190,11 @@ const loadDataList = async () => {
     return;
   }
   tableData.value = result.data;
+};
+
+const blogEditRef = ref(null);
+const showEdit = (type: string, data) => {
+  blogEditRef.value.init(type, data);
 };
 </script>
 

@@ -28,6 +28,21 @@ const routes = [
         name: "分类管理",
         component: () => import("../views/blog/BlogCategory.vue"),
       },
+      {
+        path: "special/list",
+        name: "专题管理",
+        component: () => import("../views/special/SpecialList.vue"),
+      },
+      {
+        path: "setting/my",
+        name: "个人信息",
+        component: () => import("../views/settings/MyInfo.vue"),
+      },
+      {
+        path: "setting/user",
+        name: "团队成员",
+        component: () => import("../views/settings/TeamUser.vue"),
+      },
     ]
   }
 ];
